@@ -1,3 +1,6 @@
+# Dataset files
+training/Bundesliga-Data-Shootout-9/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
