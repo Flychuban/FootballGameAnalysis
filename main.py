@@ -1,5 +1,5 @@
-from .utils import read_video_frames, save_video_frames
-from .trackers import Tracker
+from utils import read_video_frames, save_video_frames
+from trackers import Tracker
 
 def main():
     video_path = 'input_videos/test_video.mp4'

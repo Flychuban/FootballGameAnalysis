@@ -4,6 +4,9 @@ training/Bundesliga-Data-Shootout-9/
 # Output files
 output_videos/
 
+# Models files
+models/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
