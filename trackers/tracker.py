@@ -1,5 +1,11 @@
 from ultralytics import YOLO
 import supervision as sv
+import pickle
+import os
+import cv2
+import sys
+sys.path.append('../') # Add the parent directory to the path to import utils
+from utils import get_center_of_bbox, get_bbox_width
 
 class Tracker:
     def __init__(self, model_path):
@@ -17,7 +23,11 @@ class Tracker:
         return detections
             
 
-    def get_objects_tracks(self, frames):
+    def get_objects_tracks(self, frames, read_from_stub=False, stub_path=None):
+        if read_from_stub and stub_path is not None and os.path.exists(stub_path):
+            with open(stub_path, 'rb') as f:
+                return pickle.load(f)
+        
         # Detect objects in frames using YOLO
         detections = self.detect_frames(frames)
         
@@ -29,8 +39,7 @@ class Tracker:
         # Convert detections to the format required by the supervision tracker
         for frame_num, detection in enumerate(detections):
             cls_names = detection.names
-            cls_names_reverse = {cls_name: i for i, cls_name in enumerate(cls_names)}
-            
+            cls_names_reverse = {cls_name: i for i, cls_name in cls_names.items()}
             detection_supervision = sv.Detections.from_ultralytics(detection)
             # Update the tracker with the detections and track the objects
             detection_with_tracks = self.tracker.update_with_detections(detection_supervision)
@@ -55,5 +64,35 @@ class Tracker:
                 
                 if class_id == cls_names_reverse['ball']:
                     tracks["ball"][frame_num][1] = {"bbox": bbox} # Only one ball in the frame
-        print(tracks)
+        
+        if stub_path is not None:
+            with open(stub_path, 'wb') as f:
+                pickle.dump(tracks, f)
+        
         return tracks
+    
+    def draw_ellipse(self, frame, bbox, color, track_id):
+        y2 = int(bbox[3])
+        
+        x_center, _ = get_center_of_bbox(bbox)
+        width = get_bbox_width(bbox)
+        
+        cv2.ellipse(frame, (x_center, y2), (int(width), int(width*0.4)), angle=0.0, startAngle=-45, endAngle=235, color=color, thickness=2, lineType=cv2.LINE_4)
+        return frame
+        
+    def draw_annotations(self, video_frames, tracks):
+        output_video_frames = []
+        
+        for frame_num, frame in enumerate(video_frames):
+            frame = frame.copy()
+            
+            player_dict = tracks["players"][frame_num]
+            ball_dict = tracks["ball"][frame_num]
+            
+            # Draw players
+            for track_id, player in player_dict.items():
+                frame = self.draw_ellipse(frame, player["bbox"], (0, 255, 0), track_id)
+            
+            output_video_frames.append(frame) 
+        
+        return output_video_frames
