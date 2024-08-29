@@ -12,6 +12,9 @@ def main():
     
     tracks = tracker.get_objects_tracks(frames, read_from_stub=True, stub_path='stubs/track_stubs.pkl')
     
+    # Interpolate the ball positions
+    tracks['ball'] = tracker.interpolate_ball_positions(tracks['ball'])
+    
     # # save croped image for every player
     # for track_id, player in tracks["players"][0].items():
     #     bbox = player['bbox']
