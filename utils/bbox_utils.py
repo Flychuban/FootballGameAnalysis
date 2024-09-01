@@ -36,3 +36,6 @@ def measure_distance(point1, point2):
     x2, y2 = point2
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
+def measure_xy_distance(p1, p2):
+    return p1[0] - p2[0], p1[1] - p2[1]
+
