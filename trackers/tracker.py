@@ -7,12 +7,26 @@ import sys
 import numpy as np
 import pandas as pd
 sys.path.append('../') # Add the parent directory to the path to import utils
-from utils import get_center_of_bbox, get_bbox_width
+from utils import get_center_of_bbox, get_bbox_width, get_foot_position
 
 class Tracker:
     def __init__(self, model_path):
         self.model = YOLO(model_path)
         self.tracker = sv.ByteTrack()
+        
+    def add_position_to_track(self, tracks):
+        for object, object_tracks in tracks.items():
+            for frame_num, track in enumerate(object_tracks):
+                for track_id, track_info in track.items():
+                    bbox = track_info.get('bbox', [])
+                    if object == 'ball':
+                        position = get_center_of_bbox(bbox)
+                    else:
+                        position = get_foot_position(bbox)
+                    
+                    tracks[object][frame_num][track_id]['position'] = get_center_of_bbox(bbox)
+                        
+        
         
     def interpolate_ball_positions(self, ball_positions):
         ball_positions = [x.get(1, {}).get('bbox', []) for x in ball_positions]

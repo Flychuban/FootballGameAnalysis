@@ -39,3 +39,14 @@ def measure_distance(point1, point2):
 def measure_xy_distance(p1, p2):
     return p1[0] - p2[0], p1[1] - p2[1]
 
+def get_foot_position(player_bbox):
+    """Get the foot position of a player.
+
+    Args:
+        player_bbox (list): A list of four integers representing the player's bounding box.
+
+    Returns:
+        tuple: A tuple of two integers representing the foot position of the player.
+    """
+    x1, y1, x2, y2 = player_bbox
+    return int((x1 + x2) / 2), int(y2)
