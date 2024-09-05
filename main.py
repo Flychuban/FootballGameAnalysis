@@ -6,6 +6,7 @@ from team_assigner import TeamAssigner
 from player_ball_assigner import PlayerBallAssigner
 from camera_movement_estimator import CameraMovementEstimator
 from view_transformer import ViewTransformer
+from speed_and_distance_estimator import SpeedAndDistanceEstimator
 
 def main():
     video_path = 'input_videos/test_video.mp4'
@@ -31,15 +32,9 @@ def main():
     # Interpolate the ball positions
     tracks['ball'] = tracker.interpolate_ball_positions(tracks['ball'])
     
-    # # save croped image for every player
-    # for track_id, player in tracks["players"][0].items():
-    #     bbox = player['bbox']
-    #     frame = frames[0]
-    #     cropped_image = frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
-        
-    #     # Save the cropped image
-    #     cv2.imwrite(f'output_videos/player_{track_id}_img.jpg', cropped_image)
-    #     break
+    # Initialize the speed and distance estimator
+    speed_and_distance_estimator = SpeedAndDistanceEstimator()
+    speed_and_distance_estimator.add_speed_and_distance_to_tracks(tracks)
     
     # Assign team colors to players
     team_assigner = TeamAssigner()
@@ -52,7 +47,7 @@ def main():
             tracks['players'][frame_num][player_id]['team'] = team
             tracks['players'][frame_num][player_id]['team_color'] = team_assigner.team_colors[team]
             
-        # Assign the ball to a player
+    # Assign the ball to a player
     player_ball_assigner = PlayerBallAssigner()
     team_ball_control = []
     
@@ -73,6 +68,10 @@ def main():
     
     # Draw the camera movement on the frames
     output_video_frames = camera_movement_estimator.draw_camera_movement(output_video_frames, camera_movement_per_frame)
+    
+    
+    # Draw the speed and distance on the frames
+    speed_and_distance_estimator.draw_speed_and_distance(output_video_frames, tracks)
     
     save_video_frames(output_video_frames, 'output_videos/video.avi')
     
